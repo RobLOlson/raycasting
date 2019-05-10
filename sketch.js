@@ -71,10 +71,10 @@ function draw() {
         let green = walls[particle.wall_id[i]].green;
         let blue = walls[particle.wall_id[i]].blue;
 
-        const h = map(scene[i], 0, sceneW, 25*sceneH/scene[i], 0);
+        const h = map(scene[i], 0, sceneW, sceneH, 0);
         fill(red-scene[i], green-scene[i], blue-scene[i]);
         rectMode(CENTER);
-        rect(i*w + w / 2, sceneH / 2, w+1, h);
+        rect(i*w + w / 2, sceneH / 2, w+1, 25*h/scene[i]);
 
     }
     pop();

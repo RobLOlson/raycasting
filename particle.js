@@ -1,22 +1,23 @@
 class Particle {
     constructor() {
         this.pos = createVector(width / 2, height / 2);
-        this.prev_pos = this.pos;
         this.heading = 0;
-        this.fov = 45;
+        this.fov = 50;
+        this.resolution = 100;
         this.mouse_mode = true;
         this.v = 0;
         this.rays = [];
         this.wall_id = [];
-        for (let i = -this.fov; i < this.fov; i += 1) {
-            this.rays.push(new Ray(this.pos, radians(i)));
+        for (let i = -this.resolution; i < this.resolution; i += 1) {
+            this.rays.push(new Ray(this.pos, atan(this.fov*i/(100*this.resolution))));
         }
     }
 
     rotate(angle) {
         this.heading += angle;
-        for(let i = 0; i < 2*this.fov; i += 1) {
-            this.rays[i].look_at_angle(radians(i+this.heading-this.fov));
+        this.rays = [];
+        for (let i = -this.resolution; i < this.resolution; i += 1) {
+            this.rays.push(new Ray(this.pos, radians(this.heading)+atan(+this.fov*i/(100*this.resolution))));
         }
     }
 
@@ -47,7 +48,7 @@ class Particle {
             }
 
                 let a = ray.dir.heading() - radians(this.heading);
-                scene.push(record*cos(a));
+                scene.push(cos(a)*record);
                 this.wall_id.push(target_i);
         }
         return scene
@@ -71,7 +72,7 @@ class Particle {
         //         stroke(255, 100);
         //         line(this.pos.x, this.pos.y, closest.x, closest.y);
         //     }
-                let a = ray.dir.heading() - radians(this.heading);
+                // let a = ray.dir.heading() - radians(this.heading);
         //         scene.push(record*cos(a));
         // }
         // return scene
@@ -86,7 +87,6 @@ class Particle {
 
 
         if(x != this.pos.x && y != this.pos.y  && this.v==0 && this.mouse_mode) {
-        // if(this.pos != this.prev_pos) {
             let dx = x - this.pos.x;
             let dy = y - this.pos.y;
 
@@ -97,19 +97,19 @@ class Particle {
 
             this.heading = degrees(dir.heading());
 
-            for (let i = 0; i < this.fov*2; i += 1) {
-                this.rays[i].pos = this.pos;
-                this.rays[i].look_at_angle(radians(this.heading+i-this.fov));
+            for (let i = -this.resolution; i < this.resolution; i += 1) {
+                this.rays[i+this.resolution].pos = this.pos;
+                this.rays[i+this.resolution].look_at_angle(radians(this.heading)+atan(this.fov*i/(100*this.resolution)));
             }
-            if(dir.magSq() > .0001)
-            {
-                this.pos.set(this.pos.x+dx, this.pos.y +dy);
-            }
+            this.pos.set(this.pos.x+dx, this.pos.y +dy);
         }
     }
 
     show() {
-
+        // TRYING to make a red heading vector
+        // fill("red");
+        // const delta=this.pos+10*p5.Vector.fromAngle(this.heading);
+        // line(this.pos.x, this.pos.y, delta.x, delta.y);
         fill(255);
         ellipse(this.pos.x, this.pos.y, 8);
         for (let ray of this.rays) {
