@@ -4,7 +4,10 @@ class Particle {
         this.prev_pos = this.pos;
         this.heading = 0;
         this.fov = 45;
+        this.mouse_mode = true;
+        this.v = 0;
         this.rays = [];
+        this.wall_id = [];
         for (let i = -this.fov; i < this.fov; i += 1) {
             this.rays.push(new Ray(this.pos, radians(i)));
         }
@@ -19,53 +22,89 @@ class Particle {
 
     look(wall) {
         const scene = [];
+        this.wall_id = [];
         for (let ray of this.rays) {
             let closest = null;
             let record = Infinity;
+            let index = 0;
+            let target_i = 0;
+
             for(let wall of walls) {
                 const pt = ray.cast(wall);
                 if (pt) {
-                    const d = p5.Vector.dist(this.pos, pt);
+                    let d = p5.Vector.dist(this.pos, pt);
                     if (d<record) {
                         record = d;
                         closest = pt;
+                        target_i = index;
                     }
                 }
+                index+=1;
             }
             if(closest) {
                 stroke(255, 100);
                 line(this.pos.x, this.pos.y, closest.x, closest.y);
             }
-                scene.push(record);
+
+                let a = ray.dir.heading() - radians(this.heading);
+                scene.push(record*cos(a));
+                this.wall_id.push(target_i);
         }
         return scene
+
+        // const scene = [];
+        // for (let ray of this.rays) {
+        //     let closest = null;
+        //     let record = Infinity;
+        //     scene_colors = [];
+        //     for(let wall of walls) {
+        //         const pt = ray.cast(wall);
+        //         if (pt) {
+        //             let d = p5.Vector.dist(this.pos, pt);
+        //             if (d<record) {
+        //                 record = d;
+        //                 closest = pt;
+        //             }
+        //         }
+        //     }
+        //     if(closest) {
+        //         stroke(255, 100);
+        //         line(this.pos.x, this.pos.y, closest.x, closest.y);
+        //     }
+                let a = ray.dir.heading() - radians(this.heading);
+        //         scene.push(record*cos(a));
+        // }
+        // return scene
     }
 
     update(x, y) {
+        let dir = p5.Vector.fromAngle(radians(this.heading));
+        if(this.v != 0)
+        {
+            this.pos.set(this.pos.x+dir.x*this.v, this.pos.y+dir.y*this.v);
+        }
 
 
-
-        if(x != this.pos.x && y != this.pos.y) {
+        if(x != this.pos.x && y != this.pos.y  && this.v==0 && this.mouse_mode) {
         // if(this.pos != this.prev_pos) {
             let dx = x - this.pos.x;
             let dy = y - this.pos.y;
 
-            dx = dx / 3;
-            dy = dy / 3;
+            dx = dx / 50;
+            dy = dy / 50;
 
             let dir = createVector(dx,dy);
 
-            console.log(degrees(dir.heading()));
-
-            if(dir.magSq() > 0.01)
-            this.heading = (degrees(dir.heading())+9*this.heading)/10;
+            this.heading = degrees(dir.heading());
 
             for (let i = 0; i < this.fov*2; i += 1) {
                 this.rays[i].pos = this.pos;
                 this.rays[i].look_at_angle(radians(this.heading+i-this.fov));
             }
-
-            this.pos.set(this.pos.x+dx, this.pos.y +dy);
+            if(dir.magSq() > .0001)
+            {
+                this.pos.set(this.pos.x+dx, this.pos.y +dy);
+            }
         }
     }
 
