@@ -28,6 +28,13 @@ function setup() {
 }
 
 function draw() {
+    if(keyIsDown(LEFT_ARROW)){
+        particle.rotate(-1);
+    }
+    else if(keyIsDown(RIGHT_ARROW)){
+        particle.rotate(1);
+    }
+
     background(0);
     for(let wall of walls)
     {

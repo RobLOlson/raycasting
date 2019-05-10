@@ -1,9 +1,19 @@
 class Particle {
     constructor() {
         this.pos = createVector(width / 2, height / 2);
+        this.prev_pos = this.pos;
+        this.heading = 0;
+        this.fov = 45;
         this.rays = [];
-        for (let i = 180; i < 270; i += 1) {
+        for (let i = -this.fov; i < this.fov; i += 1) {
             this.rays.push(new Ray(this.pos, radians(i)));
+        }
+    }
+
+    rotate(angle) {
+        this.heading += angle;
+        for(let i = 0; i < 2*this.fov; i += 1) {
+            this.rays[i].look_at_angle(radians(i+this.heading-this.fov));
         }
     }
 
@@ -32,7 +42,31 @@ class Particle {
     }
 
     update(x, y) {
-        this.pos.set(x,y);
+
+
+
+        if(x != this.pos.x && y != this.pos.y) {
+        // if(this.pos != this.prev_pos) {
+            let dx = x - this.pos.x;
+            let dy = y - this.pos.y;
+
+            dx = dx / 3;
+            dy = dy / 3;
+
+            let dir = createVector(dx,dy);
+
+            console.log(degrees(dir.heading()));
+
+            if(dir.magSq() > 0.01)
+            this.heading = (degrees(dir.heading())+9*this.heading)/10;
+
+            for (let i = 0; i < this.fov*2; i += 1) {
+                this.rays[i].pos = this.pos;
+                this.rays[i].look_at_angle(radians(this.heading+i-this.fov));
+            }
+
+            this.pos.set(this.pos.x+dx, this.pos.y +dy);
+        }
     }
 
     show() {
